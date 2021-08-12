@@ -39,6 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pinocchio/parsers/urdf.hpp>
 
 #include <urdf_parser/urdf_parser.h>
+#include <pinocchio/utils/file-explorer.hpp>
 
 namespace ocs2 {
 
@@ -99,7 +100,17 @@ void PinocchioGeometryInterface::buildGeomFromPinocchioInterface(const Pinocchio
   urdfAsXml->Accept(&printer);
   const std::stringstream urdfAsStringStream(printer.Str());
 
-  pinocchio::urdf::buildGeom(pinocchioInterface.getModel(), urdfAsStringStream, pinocchio::COLLISION, geomModel);
+  std::cerr << "Found the following ros paths:" << std::endl;
+  std::vector<std::string> rosPaths = pinocchio::rosPaths();
+  for (auto& path : rosPaths){
+    size_t i = path.rfind('/', path.length());
+    if (i != std::string::npos) {
+      path = path.substr(0, i);
+    }
+    std::cerr << path << std::endl;
+  }
+
+  pinocchio::urdf::buildGeom(pinocchioInterface.getModel(), urdfAsStringStream, pinocchio::COLLISION, geomModel, rosPaths);
 }
 /******************************************************************************************************/
 /******************************************************************************************************/
